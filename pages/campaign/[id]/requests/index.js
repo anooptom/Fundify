@@ -57,6 +57,7 @@ export async function getServerSideProps({ params }) {
       balance: summary[1],
       name: summary[5],
       ETHPrice,
+      manager:summary[4]
     },
   };
 }
@@ -249,6 +250,7 @@ export default function Requests({
   balance,
   name,
   ETHPrice,
+  manager
 }) {
   const [requestsList, setRequestsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -263,7 +265,6 @@ export default function Requests({
             return campaign.methods.requests(index).call();
           })
       );
-
       console.log("requests", requests);
       setRequestsList(requests);
       setIsLoading(false);
