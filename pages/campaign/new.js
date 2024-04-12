@@ -57,33 +57,29 @@ export default function NewCampaign() {
     }
   }, []);
   async function onSubmit(data) {
-    console.log(
-      data.minimumContribution,
-      data.campaignName,
-      data.description,
-      data.imageUrl,
-      data.target
-    );
     try {
-      const accounts = await web3.eth.getAccounts();
-      await factory.methods
-        .createCampaign(
-          web3.utils.toWei(data.minimumContribution, "ether"),
-          data.campaignName,
-          data.description,
-          data.imageUrl,
-          web3.utils.toWei(data.target, "ether")
-        )
-        .send({
-          from: accounts[0],
-        });
+        const accounts = await web3.eth.getAccounts();
+        await factory.methods
+            .createCampaign(
+                web3.utils.toWei(data.minimumContribution, "ether"),
+                data.campaignName,
+                data.description,
+                data.imageUrl,
+                web3.utils.toWei(data.target, "ether"),
+                data.tokenName,  // Pass token name from the form
+                data.tokenSymbol // Pass token symbol from the form
+            )
+            .send({
+                from: accounts[0],
+            });
 
-      router.push("/");
+        router.push("/");
     } catch (err) {
-      setError(err.message);
-      console.log(err);
+        setError(err.message);
+        console.log(err);
     }
-  }
+}
+
 
   return (
     <div>
@@ -152,6 +148,21 @@ export default function NewCampaign() {
                     type="url"
                   />
                 </FormControl>
+                <FormControl id="tokenName">
+    <FormLabel>Token Name</FormLabel>
+    <Input
+        {...register("tokenName", { required: true })}
+        isDisabled={isSubmitting}
+    />
+</FormControl>
+<FormControl id="tokenSymbol">
+    <FormLabel>Token Symbol</FormLabel>
+    <Input
+        {...register("tokenSymbol", { required: true })}
+        isDisabled={isSubmitting}
+    />
+</FormControl>
+
                 <FormControl id="target">
                   <FormLabel>Target Amount</FormLabel>
                   <InputGroup>
