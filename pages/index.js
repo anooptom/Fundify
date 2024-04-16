@@ -343,7 +343,7 @@ export default function Home({ campaigns }) {
             For any queries raise an issue on{" "}
             <Link
               color="teal.500"
-              href="https://github.com/lazim17/Fundify/issues"
+              href="https://github.com/anooptom/Fundify"
               isExternal
             >
               the Github Repo <ExternalLinkIcon mx="2px" />

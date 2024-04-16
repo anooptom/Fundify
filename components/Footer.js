@@ -73,7 +73,7 @@ export default function Footer() {
           <NextLink href="/">Home</NextLink>
           <Link
             href={
-              "https://github.com/lazim17/Fundify"
+              "https://github.com/anooptom/Fundify"
             }
             isExternal
           >
@@ -98,7 +98,7 @@ export default function Footer() {
           justify={{ base: "center"}}
           align={{ base: "center", md: "center" }}
         >
-          <Text>🌐 Made by <Link href="">Ahamed Lazim</Link>, <Link target="blank" href="">Anoop Tom</Link>, <Link target="blank" href="https://notarjunvijayan.tech">Arjun V</Link></Text>
+          <Text>🌐 Made by <Link href="">Ahamed Lazim</Link>, <Link target="blank" href="https://anoop.vercel.app">Anoop Tom</Link>, <Link target="blank" href="https://notarjunvijayan.tech">Arjun V</Link></Text>
         </Container>
       </Box>
     </Box>

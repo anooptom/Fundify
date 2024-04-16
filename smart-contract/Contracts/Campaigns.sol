@@ -66,7 +66,7 @@ contract CampaignFactory {
     function createCampaign(uint minimum, string name, string description, string image, uint target, string tokenName, string tokenSymbol) public {
         Campaign newCampaign = new Campaign(minimum, msg.sender, name, description, image, target);
 
-        Token newToken = new Token(tokenName, tokenSymbol, 1000000); // Adjust initial supply as needed
+        Token newToken = new Token(tokenName, tokenSymbol, 1000000);  
         deployedCampaigns.push(address(newCampaign));
 
         // Mint tokens for the campaign

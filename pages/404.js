@@ -42,7 +42,7 @@ export default function Custom404() {
             fontSize={"lg"}
             maxW={"500px"}
           >
-            Looks like you've wandered far into the webpage.            The link you're trying to redirect to deos not exist
+            Looks like you've wandered far into the webpage.            The link you're trying to redirect to does not exist
           </Text>
         </Container>
     )
