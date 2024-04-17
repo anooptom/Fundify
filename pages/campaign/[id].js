@@ -56,13 +56,12 @@ export async function getServerSideProps({ params }) {
       id: campaignId,
       minimumContribution: summary[0],
       balance: summary[1],
-      requestsCount: summary[2],
-      approversCount: summary[3],
-      manager: summary[4],
-      name: summary[5],
-      description: summary[6],
-      image: summary[7],
-      target: summary[8],
+      contributorsCount: summary[3],
+      manager: summary[5],
+      name: summary[6],
+      description: summary[7],
+      image: summary[8],
+      target: summary[9],
       ETHPrice,
     },
   };
@@ -114,8 +113,7 @@ export default function CampaignSingle({
   id,
   minimumContribution,
   balance,
-  requestsCount,
-  approversCount,
+  contributorsCount,
   manager,
   name,
   description,
@@ -252,21 +250,14 @@ export default function CampaignSingle({
                     title={"Wallet Address of Campaign Creator"}
                     stat={manager}
                     info={
-                      "The Campaign Creator created the campaign and can create requests to withdraw money."
+                      "The Campaign Creator created the campaign and can withdraw money."
                     }
                   />
                   <StatsCard
-                    title={"Number of Requests"}
-                    stat={requestsCount}
+                    title={"Number of Contributions"}
+                    stat={contributorsCount}
                     info={
-                      "A request tries to withdraw money from the contract. Requests must be approved by approvers"
-                    }
-                  />
-                  <StatsCard
-                    title={"Number of Approvers"}
-                    stat={approversCount}
-                    info={
-                      "Number of people who have already donated to this campaign"
+                      "Total number of contributions in this Campaign"
                     }
                   />
                 </SimpleGrid>
@@ -284,11 +275,10 @@ export default function CampaignSingle({
                   <StatLabel fontWeight={"medium"}>
                     <Text as="span" isTruncated mr={2}>
                       {" "}
-                      Campaign Balance
+                      Total Contribution Progress
                     </Text>
                     <Tooltip
-                      label="The balance is how much money this campaign has left to
-                  spend."
+                      label="Total ETH that has been contributed to the campaign"
                       bg={useColorModeValue("white", "gray.700")}
                       placement={"top"}
                       color={useColorModeValue("gray.800", "white")}
@@ -310,7 +300,7 @@ export default function CampaignSingle({
                       <Text as="span" fontWeight={"bold"}>
                         {balance > 0
                           ? web3.utils.fromWei(balance, "ether")
-                          : "0, Become a Donor 😄"}
+                          : "No Contributions"}
                       </Text>
                       <Text
                         as="span"
@@ -433,7 +423,7 @@ export default function CampaignSingle({
                 p={{ base: 4, sm: 6, md: 8 }}
                 spacing={4}
               >
-                <NextLink href={`/campaign/${id}/requests`}>
+                <NextLink href={`/campaign/${id}/withdraw`}>
                   <Button
                     fontFamily={"heading"}
                     w={"full"}
@@ -443,13 +433,13 @@ export default function CampaignSingle({
                       bgGradient: "linear(to-r, teal.400,blue.400)",
                       boxShadow: "xl",
                     }}
+                    isDisabled={manager !== connectedAddress || manager == ''}
                   >
-                    View Withdrawal Requests
+                    Withdraw Funds
                   </Button>
                 </NextLink>
-                <Text fontSize={"sm"}>
-                  * You can see where these funds are being used & if you have
-                  contributed you can also approve those Withdrawal Requests :)
+                <Text fontSize={"sm"}> 
+                  * You can withdraw funds from the campaign if you are the creator :)
                 </Text>
               </Stack>
             </Stack>
