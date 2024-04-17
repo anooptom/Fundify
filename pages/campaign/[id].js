@@ -156,7 +156,7 @@ export default function CampaignSingle({
     try {
       const campaign = Campaign(id);
       const accounts = await web3.eth.getAccounts();
-      await campaign.methods.contibute().send({
+      await campaign.methods.contribute().send({
         from: accounts[0],
         value: web3.utils.toWei(data.value, "ether"),
       });

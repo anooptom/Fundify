@@ -1,7 +1,5 @@
 pragma solidity ^0.4.17;
 
-
-
 contract Token {
     string public name;
     string public symbol;
@@ -33,129 +31,90 @@ contract Token {
 
         return true;
     }
-
-    function approve(address _spender, uint256 _value) public returns (bool success) {
-        allowance[msg.sender][_spender] = _value;
-
-        emit Approval(msg.sender, _spender, _value);
-
-        return true;
-    }
-
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-        require(_to != address(0));
-        require(_value <= balanceOf[_from]);
-        require(_value <= allowance[_from][msg.sender]);
-        require(balanceOf[_to] + _value >= balanceOf[_to]);
-
-        balanceOf[_from] -= _value;
-        balanceOf[_to] += _value;
-        allowance[_from][msg.sender] -= _value;
-
-        emit Transfer(_from, _to, _value);
-
-        return true;
-    }
 }
-
-
-
-contract CampaignFactory {
-    address[] public deployedCampaigns;
-
-    function createCampaign(uint minimum, string name, string description, string image, uint target, string tokenName, string tokenSymbol) public {
-        Campaign newCampaign = new Campaign(minimum, msg.sender, name, description, image, target);
-
-        Token newToken = new Token(tokenName, tokenSymbol, 1000000);  
-        deployedCampaigns.push(address(newCampaign));
-
-        // Mint tokens for the campaign
-        newToken.transfer(address(newCampaign), newToken.totalSupply());
-    }
-
-    function getDeployedCampaigns() public view returns (address[]) {
-        return deployedCampaigns;
-    }
-}
-
 
 contract Campaign {
-  struct Request {
-      string description;
-      uint value;
-      address recipient;
-      bool complete;
-      uint approvalCount;
-      mapping(address => bool) approvals;
-  }
+    struct Request {
+        string description;
+        uint value;
+        address recipient;
+        bool complete;
+        uint approvalCount;
+        mapping(address => bool) approvals;
+    }
 
-  Request[] public requests;
-  address public manager;
-  uint public minimunContribution;
-  string public CampaignName;
-  string public CampaignDescription;
-  string public imageUrl;
-  uint public targetToAchieve;
-  address[] public contributers;
-  mapping(address => bool) public approvers;
-  uint public approversCount;
+    Request[] public requests;
+    address public manager;
+    uint public minimumContribution;
+    string public CampaignName;
+    string public CampaignDescription;
+    string public imageUrl;
+    uint public targetToAchieve;
+    address[] public contributors;
+    mapping(address => bool) public approvers;
+    uint public approversCount;
+    Token public campaignToken;
 
+    modifier restricted() {
+        require(msg.sender == manager);
+        _;
+    }
 
-  modifier restricted() {
-      require(msg.sender == manager);
-      _;
-  }
+    event ContributionReceived(address contributor, uint amount, uint tokensIssued);
 
-  function Campaign(uint minimun, address creator,string name,string description,string image,uint target) public {
-      manager = creator;
-      minimunContribution = minimun;
-      CampaignName=name;
-      CampaignDescription=description;
-      imageUrl=image;
-      targetToAchieve=target;
-  }
+    constructor(uint minimum, address creator, string name, string description, string image, uint target, address tokenAddress) public {
+        manager = creator;
+        minimumContribution = minimum;
+        CampaignName = name;
+        CampaignDescription = description;
+        imageUrl = image;
+        targetToAchieve = target;
+        campaignToken = Token(tokenAddress);
+    }
 
-  function contibute() public payable {
-      require(msg.value > minimunContribution );
+    function contribute() public payable {
+        require(msg.value >= minimumContribution);
 
-      contributers.push(msg.sender);
-      approvers[msg.sender] = true;
-      approversCount++;
-  }
+        uint tokensIssued = msg.value; // For simplicity, 1 wei = 1 token
+        campaignToken.transfer(msg.sender, tokensIssued);
+        contributors.push(msg.sender);
+        approvers[msg.sender] = true;
+        approversCount++;
 
-  function createRequest(string description, uint value, address recipient) public restricted {
-      Request memory newRequest = Request({
-         description: description,
-         value: value,
-         recipient: recipient,
-         complete: false,
-         approvalCount: 0
-      });
+        emit ContributionReceived(msg.sender, msg.value, tokensIssued);
+    }
 
-      requests.push(newRequest);
-  }
+    function createRequest(string description, uint value, address recipient) public restricted {
+        Request memory newRequest = Request({
+            description: description,
+            value: value,
+            recipient: recipient,
+            complete: false,
+            approvalCount: 0
+        });
 
-  function approveRequest(uint index) public {
-      require(approvers[msg.sender]);
-      require(!requests[index].approvals[msg.sender]);
+        requests.push(newRequest);
+    }
 
-      requests[index].approvals[msg.sender] = true;
-      requests[index].approvalCount++;
-  }
+    function approveRequest(uint index) public {
+        require(approvers[msg.sender]);
+        require(!requests[index].approvals[msg.sender]);
 
-  function finalizeRequest(uint index) public restricted{
-      require(requests[index].approvalCount > (approversCount / 2));
-      require(!requests[index].complete);
+        requests[index].approvals[msg.sender] = true;
+        requests[index].approvalCount++;
+    }
 
-      requests[index].recipient.transfer(requests[index].value);
-      requests[index].complete = true;
+    function finalizeRequest(uint index) public restricted {
+        require(requests[index].approvalCount > (approversCount / 2));
+        require(!requests[index].complete);
 
-  }
+        requests[index].recipient.transfer(requests[index].value);
+        requests[index].complete = true;
+    }
 
-
-    function getSummary() public view returns (uint,uint,uint,uint,address,string,string,string,uint) {
-        return(
-            minimunContribution,
+    function getSummary() public view returns (uint, uint, uint, uint, address, string, string, string, uint) {
+        return (
+            minimumContribution,
             this.balance,
             requests.length,
             approversCount,
@@ -164,10 +123,25 @@ contract Campaign {
             CampaignDescription,
             imageUrl,
             targetToAchieve
-          );
+        );
     }
 
-    function getRequestsCount() public view returns (uint){
+    function getRequestsCount() public view returns (uint) {
         return requests.length;
+    }
+}
+
+contract CampaignFactory {
+    address[] public deployedCampaigns;
+
+    function createCampaign(uint minimum, string name, string description, string image, uint target, string tokenName, string tokenSymbol) public {
+        Token newToken = new Token(tokenName, tokenSymbol,1000); // Deploy Token contract
+        Campaign newCampaign = new Campaign(minimum, msg.sender, name, description, image, target, address(newToken)); // Deploy Campaign contract with Token address
+        deployedCampaigns.push(address(newCampaign));
+        newToken.transfer(address(newCampaign), newToken.totalSupply()); // Transfer tokens to the Campaign contract
+    }
+
+    function getDeployedCampaigns() public view returns (address[]) {
+        return deployedCampaigns;
     }
 }
