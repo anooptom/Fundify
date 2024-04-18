@@ -83,7 +83,7 @@
             emit Withdrawal(manager, amount);
         }
 
-        function getSummary() public view returns (uint, uint, uint, uint,uint, address, string, string, string, uint) {
+        function getSummary() public view returns (uint, uint, uint, uint,uint, address,address, string, string, string, uint) {
             return (
                 minimumContribution,
                 totalBalance,
@@ -91,6 +91,7 @@
                 contributors.length,
                 contributorsCount,
                 manager,
+                address(campaignToken),
                 CampaignName,
                 CampaignDescription,
                 imageUrl,

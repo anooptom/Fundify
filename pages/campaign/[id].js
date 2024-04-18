@@ -4,6 +4,8 @@ import { useWallet } from "use-wallet";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useWindowSize } from "react-use";
+import { FaEthereum } from 'react-icons/fa'; // Importing the MetaMask icon from react-icons/fa
+
 import {
   getETHPrice,
   getETHPriceInUSD,
@@ -35,15 +37,115 @@ import {
   CloseButton,
   FormHelperText,
   Link,
+  IconButton,
 } from "@chakra-ui/react";
 
-import { InfoIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { InfoIcon, ExternalLinkIcon, CopyIcon } from "@chakra-ui/icons";
 import NextLink from "next/link";
 import Confetti from "react-confetti";
 
 import web3 from "../../smart-contract/web3";
 import Campaign from "../../smart-contract/campaign";
 import factory from "../../smart-contract/factory";
+
+const CampaignTokenStatsCard = ({ title, stat, info, tokenAddress }) => {
+  const [copied, setCopied] = useState(false);
+
+  const copyTokenAddressToClipboard = () => {
+    navigator.clipboard.writeText(tokenAddress);
+    setCopied(true);
+  };
+
+  const addTokenToMetaMask = () => {
+    try {
+      if (window.ethereum && window.ethereum.isMetaMask) {
+        const params = {
+          type: 'ERC20',
+          options: {
+            address: tokenAddress,
+          },
+        };
+        window.ethereum.request({
+          method: 'wallet_watchAsset',
+          params,
+        });
+        setCopied(true); // Optionally mark as copied after adding to MetaMask
+      } else {
+        alert("MetaMask not installed or not detected.");
+      }
+    } catch (error) {
+      console.error("Error adding token to MetaMask:", error);
+      alert("Error adding token to MetaMask. Please try again later.");
+    }
+  };
+
+  return (
+    <Box
+      px={{ base: 2, md: 4 }}
+      py={"5"}
+      shadow={"sm"}
+      border={"1px solid"}
+      borderColor={"gray.500"}
+      rounded={"lg"}
+      transition={"transform 0.3s ease"}
+      _hover={{
+        transform: "translateY(-5px)",
+      }}
+    >
+      <Tooltip
+        label={info}
+        bg={useColorModeValue("white", "gray.700")}
+        placement={"top"}
+        color={useColorModeValue("gray.800", "white")}
+        fontSize={"1em"}
+      >
+        <Box pl={{ base: 2, md: 4 }}>
+          <Box fontWeight={"medium"} isTruncated>
+            Campaign Token Address
+          </Box>
+          <Flex align="center" justify="space-between">
+            <Box
+              fontSize={"base"}
+              fontWeight={"bold"}
+              isTruncated
+              maxW={{ base: "10rem", sm: "sm" }}
+            >
+              {tokenAddress}
+            </Box>
+            <Flex align="center" mt={-5}>
+              <Tooltip
+                label={copied ? "Copied!" : "Copy Token Address"}
+                aria-label="Copy Token Address"
+                placement="top"
+              >
+                <IconButton
+                  aria-label="Copy Token Address"
+                  icon={<CopyIcon />}
+                  onClick={copyTokenAddressToClipboard}
+                  size="lg"
+                  variant="ghost"
+                />
+              </Tooltip>
+              <Tooltip
+                label={"Add Token to MetaMask"}
+                aria-label="Add Token to MetaMask"
+                placement="top"
+              >
+                <IconButton
+                  aria-label="Add Token to MetaMask"
+                  icon={<FaEthereum />}
+                  onClick={addTokenToMetaMask}
+                  size="lg"
+                  variant="ghost"
+                />
+              </Tooltip>
+            </Flex>
+          </Flex>
+        </Box>
+      </Tooltip>
+    </Box>
+  );
+};
 
 export async function getServerSideProps({ params }) {
   const campaignId = params.id;
@@ -58,10 +160,11 @@ export async function getServerSideProps({ params }) {
       balance: summary[1],
       contributorsCount: summary[3],
       manager: summary[5],
-      name: summary[6],
-      description: summary[7],
-      image: summary[8],
-      target: summary[9],
+      tokenaddress:summary[6],
+      name: summary[7],
+      description: summary[8],
+      image: summary[9],
+      target: summary[10],
       ETHPrice,
     },
   };
@@ -117,6 +220,7 @@ export default function CampaignSingle({
   manager,
   name,
   description,
+  tokenaddress,
   image,
   target,
   ETHPrice,
@@ -253,6 +357,7 @@ export default function CampaignSingle({
                       "The Campaign Creator created the campaign and can withdraw money."
                     }
                   />
+                  <CampaignTokenStatsCard tokenAddress={tokenaddress} />
                   <StatsCard
                     title={"Number of Contributions"}
                     stat={contributorsCount}
