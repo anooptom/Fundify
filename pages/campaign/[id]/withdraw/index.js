@@ -127,9 +127,8 @@ export default function Requests({
             <Box py="4">
               Total Contribution Amount :{" "}
               <Text as="span" fontWeight={"bold"} fontSize="lg">
-                {balance > 0
-                  ? web3.utils.fromWei(totalBalance, "ether")
-                  : "No Contributions"}
+                {web3.utils.fromWei(totalBalance, "ether")
+                }
               </Text>
               <Text
                 as="span"
