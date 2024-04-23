@@ -160,7 +160,7 @@ export async function getServerSideProps({ params }) {
       balance: summary[1],
       contributorsCount: summary[3],
       manager: summary[5],
-      tokenaddress:summary[6],
+      tokenaddress: summary[6],
       name: summary[7],
       description: summary[8],
       image: summary[9],
@@ -248,10 +248,10 @@ export default function CampaignSingle({
         console.error("Error fetching connected address:", error);
       }
     };
-  
+
     fetchConnectedAddress();
   }, []);
-  
+
 
   async function onSubmit(data) {
     console.log(data);
@@ -371,9 +371,11 @@ export default function CampaignSingle({
             <Stack spacing={{ base: 4 }}>
               <Box>
                 <Stat
-                  bg={useColorModeValue("white", "gray.700")}
+                  bg={useColorModeValue("white", "black")}
                   boxShadow={"lg"}
                   rounded={"xl"}
+                  border={"1px"}
+                  borderColor={useColorModeValue("white", "gray.700")}
                   p={{ base: 4, sm: 6, md: 8 }}
                   spacing={{ base: 8 }}
                 >
@@ -437,14 +439,17 @@ export default function CampaignSingle({
                       value={web3.utils.fromWei(balance, "ether")}
                       max={web3.utils.fromWei(target, "ether")}
                       mt={4}
+                      borderRadius={"lg"}
                     />
                   </StatNumber>
                 </Stat>
               </Box>
               <Stack
-                bg={useColorModeValue("white", "gray.700")}
+                bg={useColorModeValue("white", "black")}
                 boxShadow={"lg"}
                 rounded={"xl"}
+                border={"1px"}
+                borderColor={useColorModeValue("white", "gray.700")}
                 p={{ base: 4, sm: 6, md: 8 }}
                 spacing={{ base: 6 }}
               >
@@ -522,9 +527,11 @@ export default function CampaignSingle({
               </Stack>
 
               <Stack
-                bg={useColorModeValue("white", "gray.700")}
+                bg={useColorModeValue("white", "black")}
                 boxShadow={"lg"}
                 rounded={"xl"}
+                border={"1px"}
+                borderColor={useColorModeValue("white", "gray.700")}
                 p={{ base: 4, sm: 6, md: 8 }}
                 spacing={4}
               >
@@ -543,7 +550,7 @@ export default function CampaignSingle({
                     Withdraw Funds
                   </Button>
                 </NextLink>
-                <Text fontSize={"sm"}> 
+                <Text fontSize={"sm"}>
                   * You can withdraw funds from the campaign if you are the creator :)
                 </Text>
               </Stack>

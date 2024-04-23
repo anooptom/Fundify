@@ -1,4 +1,4 @@
-    pragma solidity ^0.4.17;
+pragma solidity ^0.4.17;
 
     contract Token {
         string public name;
@@ -45,6 +45,7 @@
         uint public contributorsCount;
         Token public campaignToken;
         uint public totalBalance;
+        uint public tokenPrice;
 
         modifier restricted() {
             require(msg.sender == manager);
@@ -54,7 +55,7 @@
         event ContributionReceived(address contributor, uint amount, uint tokensIssued);
         event Withdrawal(address recipient, uint amount);
 
-        constructor(uint minimum, address creator, string name, string description, string image, uint target, address tokenAddress) public {
+        constructor(uint minimum, address creator, string name, string description, string image, uint target, address tokenAddress, uint contributorSupply) public {
             manager = creator;
             minimumContribution = minimum;
             CampaignName = name;
@@ -62,12 +63,13 @@
             imageUrl = image;
             targetToAchieve = target;
             campaignToken = Token(tokenAddress);
+            tokenPrice = contributorSupply/target;
         }
 
         function contribute() public payable {
             require(msg.value >= minimumContribution);
 
-            uint tokensIssued = msg.value; // For simplicity, 1 wei = 1 token
+            uint tokensIssued = msg.value*tokenPrice; // For simplicity, 1 wei = 1 token
             campaignToken.transfer(msg.sender, tokensIssued);
             contributors.push(msg.sender);
             contributorsCount++;
@@ -101,16 +103,47 @@
     }
 
     contract CampaignFactory {
-        address[] public deployedCampaigns;
+    address[] public deployedCampaigns;
 
-        function createCampaign(uint minimum, string name, string description, string image, uint target, string tokenName, string tokenSymbol) public {
-            Token newToken = new Token(tokenName, tokenSymbol,1000); // Deploy Token contract
-            Campaign newCampaign = new Campaign(minimum, msg.sender, name, description, image, target, address(newToken)); // Deploy Campaign contract with Token address
-            deployedCampaigns.push(address(newCampaign));
-            newToken.transfer(address(newCampaign), newToken.totalSupply()); // Transfer tokens to the Campaign contract
-        }
+    function createCampaign(
+        uint minimum,
+        string memory name,
+        string memory description,
+        string memory image,
+        uint target,
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint equity,
+        uint totalSupply
+    ) public {
+        // Deploy Token and Campaign contracts
+        Token newToken = new Token(tokenName, tokenSymbol, totalSupply);
 
-        function getDeployedCampaigns() public view returns (address[]) {
-            return deployedCampaigns;
-        }
+        // Calculate token supplies
+        uint totalTokenSupply = newToken.totalSupply();
+        uint contributorSupply = (totalTokenSupply * equity) / 100;
+        uint creatorSupply = totalTokenSupply - contributorSupply;
+
+        Campaign newCampaign = new Campaign(
+            minimum,
+            msg.sender,
+            name,
+            description,
+            image,
+            target,
+            address(newToken),
+            contributorSupply
+        );
+
+        // Push Campaign address to deployedCampaigns array
+        deployedCampaigns.push(address(newCampaign));
+
+        // Transfer tokens to Campaign contract and creator
+        newToken.transfer(address(newCampaign), contributorSupply);
+        newToken.transfer(msg.sender, creatorSupply);
     }
+
+    function getDeployedCampaigns() public view returns (address[] memory) {
+        return deployedCampaigns;
+    }
+}
