@@ -4,7 +4,7 @@ import { useWallet } from "use-wallet";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useWindowSize } from "react-use";
-import { FaEthereum } from 'react-icons/fa'; // Importing the MetaMask icon from react-icons/fa
+import { FaEthereum } from "react-icons/fa"; // Importing the MetaMask icon from react-icons/fa
 
 import {
   getETHPrice,
@@ -60,13 +60,13 @@ const CampaignTokenStatsCard = ({ title, stat, info, tokenAddress }) => {
     try {
       if (window.ethereum && window.ethereum.isMetaMask) {
         const params = {
-          type: 'ERC20',
+          type: "ERC20",
           options: {
             address: tokenAddress,
           },
         };
         window.ethereum.request({
-          method: 'wallet_watchAsset',
+          method: "wallet_watchAsset",
           params,
         });
         setCopied(true); // Optionally mark as copied after adding to MetaMask
@@ -201,7 +201,7 @@ function StatsCard(props) {
               fontSize={"base"}
               fontWeight={"bold"}
               isTruncated
-              maxW={{ base: "	10rem", sm: "sm" }}
+              maxW={{ base: "10rem", sm: "sm" }}
             >
               {stat}
             </StatNumber>
@@ -236,7 +236,9 @@ export default function CampaignSingle({
   const wallet = useWallet();
   const router = useRouter();
   const { width, height } = useWindowSize();
-
+  const isCompleted = Number(balance) >= Number(target);
+  const remTarget = web3.utils.toWei((parseFloat(target) - parseFloat(balance)).toString(), "ether");
+  const remainingTarget = remTarget/1000000000000000000000000000000000000
   useEffect(() => {
     const fetchConnectedAddress = async () => {
       try {
@@ -251,7 +253,6 @@ export default function CampaignSingle({
 
     fetchConnectedAddress();
   }, []);
-
 
   async function onSubmit(data) {
     console.log(data);
@@ -361,88 +362,90 @@ export default function CampaignSingle({
                   <StatsCard
                     title={"Number of Contributions"}
                     stat={contributorsCount}
-                    info={
-                      "Total number of contributions in this Campaign"
-                    }
+                    info={"Total number of contributions in this Campaign"}
                   />
                 </SimpleGrid>
               </Box>
             </Stack>
             <Stack spacing={{ base: 4 }}>
               <Box>
-                <Stat
-                  bg={useColorModeValue("white", "black")}
-                  boxShadow={"lg"}
-                  rounded={"xl"}
-                  border={"1px"}
-                  borderColor={useColorModeValue("white", "gray.700")}
-                  p={{ base: 4, sm: 6, md: 8 }}
-                  spacing={{ base: 8 }}
-                >
-                  <StatLabel fontWeight={"medium"}>
-                    <Text as="span" isTruncated mr={2}>
-                      {" "}
-                      Total Contribution Progress
-                    </Text>
-                    <Tooltip
-                      label="Total ETH that has been contributed to the campaign"
-                      bg={useColorModeValue("white", "gray.700")}
-                      placement={"top"}
-                      color={useColorModeValue("gray.800", "white")}
-                      fontSize={"1em"}
-                      px="4"
-                    >
-                      <InfoIcon
-                        color={useColorModeValue("teal.800", "white")}
-                      />
-                    </Tooltip>
-                  </StatLabel>
-                  <StatNumber>
-                    <Box
-                      fontSize={"2xl"}
-                      isTruncated
-                      maxW={{ base: "	15rem", sm: "sm" }}
-                      pt="2"
-                    >
-                      <Text as="span" fontWeight={"bold"}>
-                        {balance > 0
-                          ? web3.utils.fromWei(balance, "ether")
-                          : "No Contributions"}
-                      </Text>
-                      <Text
-                        as="span"
-                        display={balance > 0 ? "inline" : "none"}
-                        pr={2}
-                        fontWeight={"bold"}
-                      >
+                
+                  <Stat
+                    bg={useColorModeValue("white", "black")}
+                    boxShadow={"lg"}
+                    rounded={"xl"}
+                    border={"1px"}
+                    borderColor={useColorModeValue("white", "gray.700")}
+                    p={{ base: 4, sm: 6, md: 8 }}
+                    spacing={{ base: 8 }}
+                  >
+                    <StatLabel fontWeight={"medium"}>
+                      <Text as="span" isTruncated mr={2}>
                         {" "}
-                        ETH
+                        Total Contribution Progress
                       </Text>
-                      <Text
-                        as="span"
-                        fontSize="lg"
-                        display={balance > 0 ? "inline" : "none"}
-                        fontWeight={"normal"}
-                        color={useColorModeValue("gray.500", "gray.200")}
+                      <Tooltip
+                        label="Total ETH that has been contributed to the campaign"
+                        bg={useColorModeValue("white", "gray.700")}
+                        placement={"top"}
+                        color={useColorModeValue("gray.800", "white")}
+                        fontSize={"1em"}
+                        px="4"
                       >
-                        (${getWEIPriceInUSD(ETHPrice, balance)})
-                      </Text>
-                    </Box>
+                        <InfoIcon color={useColorModeValue("teal.800", "white")} />
+                      </Tooltip>
+                    </StatLabel>
+                    <StatNumber>
+                    {isCompleted ? (
+                <Text fontSize={"lg"} fontWeight="normal">
+                  Campaign Successfully Completed
+                </Text>
+              ) : (<Box
+                        fontSize={"2xl"}
+                        isTruncated
+                        maxW={{ base: " 15rem", sm: "sm" }}
+                        pt="2"
+                      >
+                        <Text as="span" fontWeight={"bold"}>
+                          {balance > 0
+                            ? web3.utils.fromWei(balance, "ether")
+                            : "No Contributions"}
+                        </Text>
+                   <Text
+                          as="span"
+                          display={balance > 0 ? "inline" : "none"}
+                          pr={2}
+                          fontWeight={"bold"}
+                        >
+                          {" "}
+                          ETH
+                        </Text>
+                        <Text
+                          as="span"
+                          fontSize="lg"
+                          display={balance > 0 ? "inline" : "none"}
+                          fontWeight={"normal"}
+                          color={useColorModeValue("gray.500", "gray.200")}
+                        >
+                          (${getWEIPriceInUSD(ETHPrice, balance)})
+                        </Text>
+                      </Box>)}
 
-                    <Text fontSize={"md"} fontWeight="normal">
-                      target of {web3.utils.fromWei(target, "ether")} ETH ($
-                      {getWEIPriceInUSD(ETHPrice, target)})
-                    </Text>
-                    <Progress
-                      colorScheme="teal"
-                      size="sm"
-                      value={web3.utils.fromWei(balance, "ether")}
-                      max={web3.utils.fromWei(target, "ether")}
-                      mt={4}
-                      borderRadius={"lg"}
-                    />
-                  </StatNumber>
-                </Stat>
+                      <Text fontSize={"md"} fontWeight="normal">
+                        target of {web3.utils.fromWei(target, "ether")} ETH ($
+                        {getWEIPriceInUSD(ETHPrice, target)})
+                      </Text>
+                      <Progress
+                        colorScheme="teal"
+                        size="sm"
+                        value={web3.utils.fromWei(balance, "ether")}
+                        max={web3.utils.fromWei(target, "ether")}
+                        mt={4}
+                        borderRadius={"lg"}
+                      />
+                    </StatNumber>
+                  </Stat>
+              
               </Box>
               <Stack
                 bg={useColorModeValue("white", "black")}
@@ -451,7 +454,7 @@ export default function CampaignSingle({
                 border={"1px"}
                 borderColor={useColorModeValue("white", "gray.700")}
                 p={{ base: 4, sm: 6, md: 8 }}
-                spacing={{ base: 6 }}
+                spacing={6}
               >
                 <Heading
                   lineHeight={1.1}
@@ -498,21 +501,22 @@ export default function CampaignSingle({
                     <Stack spacing={10}>
                       {wallet.status === "connected" ? (
                         <Button
-                          fontFamily={"heading"}
-                          mt={4}
-                          w={"full"}
-                          bgGradient="linear(to-r, teal.400,green.400)"
-                          color={"white"}
-                          _hover={{
-                            bgGradient: "linear(to-r, teal.400,blue.400)",
-                            boxShadow: "xl",
-                          }}
-                          isLoading={formState.isSubmitting}
-                          isDisabled={amountInUSD ? (manager === connectedAddress) : true}
-                          type="submit"
-                        >
-                          Contribute
-                        </Button>
+                        fontFamily={"heading"}
+                        mt={4}
+                        w={"full"}
+                        bgGradient="linear(to-r, teal.400,green.400)"
+                        color={"white"}
+                        _hover={{
+                          bgGradient: "linear(to-r, teal.400,blue.400)",
+                          boxShadow: "xl",
+                        }}
+                        isLoading={formState.isSubmitting}
+                        isDisabled={amountInUSD ? manager === connectedAddress || balance >= target : true}
+                        type="submit"
+                      >
+                        Contribute
+                      </Button>
+                      
                       ) : (
                         <Alert status="warning" mt={4}>
                           <AlertIcon />
@@ -526,34 +530,36 @@ export default function CampaignSingle({
                 </Box>
               </Stack>
 
-              <Stack
-                bg={useColorModeValue("white", "black")}
-                boxShadow={"lg"}
-                rounded={"xl"}
-                border={"1px"}
-                borderColor={useColorModeValue("white", "gray.700")}
-                p={{ base: 4, sm: 6, md: 8 }}
-                spacing={4}
-              >
-                <NextLink href={`/campaign/${id}/withdraw`}>
-                  <Button
-                    fontFamily={"heading"}
-                    w={"full"}
-                    bgGradient="linear(to-r, teal.400,green.400)"
-                    color={"white"}
-                    _hover={{
-                      bgGradient: "linear(to-r, teal.400,blue.400)",
-                      boxShadow: "xl",
-                    }}
-                    isDisabled={manager !== connectedAddress || manager == ''}
-                  >
-                    Withdraw Funds
-                  </Button>
-                </NextLink>
-                <Text fontSize={"sm"}>
-                  * You can withdraw funds from the campaign if you are the creator :)
-                </Text>
-              </Stack>
+              {manager === connectedAddress && (
+                <Stack
+                  bg={useColorModeValue("white", "black")}
+                  boxShadow={"lg"}
+                  rounded={"xl"}
+                  border={"1px"}
+                  borderColor={useColorModeValue("white", "gray.700")}
+                  p={{ base: 4, sm: 6, md: 8 }}
+                  spacing={4}
+                >
+                  <NextLink href={`/campaign/${id}/withdraw`}>
+                    <Button
+                      fontFamily={"heading"}
+                      w={"full"}
+                      bgGradient="linear(to-r, teal.400,green.400)"
+                      color={"white"}
+                      _hover={{
+                        bgGradient: "linear(to-r, teal.400,blue.400)",
+                        boxShadow: "xl",
+                      }}
+                      isDisabled={manager !== connectedAddress || wallet.status !== "connected"}
+                    >
+                      Withdraw Funds
+                    </Button>
+                  </NextLink>
+                  <Text fontSize={"sm"}>
+                    * You can withdraw funds from the campaign if you are the creator :)
+                  </Text>
+                </Stack>
+              )}
             </Stack>
           </Container>
         </Box>

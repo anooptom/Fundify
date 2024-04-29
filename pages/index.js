@@ -148,7 +148,11 @@ function CampaignCard({
           </Flex>
           <Flex direction="row" py={2}>
             <Box w="full">
-              <Box
+            {Number(balance)>=Number(target) ? (
+                <Text fontSize={"lg"} fontWeight="normal">
+                  Campaign Successfully Completed
+                </Text>
+              ) : (<Box
                 fontSize={"2xl"}
                 isTruncated
                 maxW={{ base: "	15rem", sm: "sm" }}
@@ -177,7 +181,7 @@ function CampaignCard({
                 >
                   (${getWEIPriceInUSD(ethPrice, balance)})
                 </Text>
-              </Box>
+              </Box>)}
 
               <Text fontSize={"sm"} fontWeight="normal">
                 Target: {web3.utils.fromWei(target, "ether")} ETH ($
